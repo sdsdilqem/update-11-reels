@@ -1,0 +1,69 @@
+CREATE TABLE users (
+  id VARCHAR(36) PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  avatar VARCHAR(255),
+  verification_level ENUM('BASIC', 'VERIFIED', 'PREMIUM') DEFAULT 'BASIC',
+  trust_score INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE posts (
+  id VARCHAR(36) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2),
+  image_urls JSON,
+  status ENUM('AVAILABLE', 'PENDING', 'SOLD', 'RESERVED') DEFAULT 'AVAILABLE',
+  is_sponsored BOOLEAN DEFAULT FALSE,
+  category_id VARCHAR(36),
+  user_id VARCHAR(36),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE comments (
+  id VARCHAR(36) PRIMARY KEY,
+  text TEXT NOT NULL,
+  user_id VARCHAR(36),
+  post_id VARCHAR(36),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (post_id) REFERENCES posts(id)
+);
+
+CREATE TABLE likes (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36),
+  post_id VARCHAR(36),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (post_id) REFERENCES posts(id),
+  UNIQUE KEY unique_like (user_id, post_id)
+);
+
+CREATE TABLE messages (
+  id VARCHAR(36) PRIMARY KEY,
+  content TEXT NOT NULL,
+  sender_id VARCHAR(36),
+  receiver_id VARCHAR(36),
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_id) REFERENCES users(id),
+  FOREIGN KEY (receiver_id) REFERENCES users(id)
+);
+
+CREATE TABLE notifications (
+  id VARCHAR(36) PRIMARY KEY,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  user_id VARCHAR(36),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
